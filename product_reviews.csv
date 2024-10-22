@@ -1,0 +1,12 @@
+ID,ProductID,Review,Rating,Date
+1,101,"This smartphone is amazing! The camera quality is outstanding, and the battery life is impressive. Highly recommended!",5,2024-03-15
+2,101,"Decent phone, but the battery drains too quickly. Otherwise, it's okay.",3,2024-03-16
+3,102,"These headphones are a game-changer. The noise cancellation is top-notch, and the sound quality is superb.",5,2024-03-17
+4,102,"Comfortable to wear, but the sound quality is just average. Expected better for the price.",3,2024-03-18
+5,103,"This laptop is a disappointment. It's slow, the build quality is poor, and it overheats easily. Avoid!",1,2024-03-19
+6,103,"Great laptop for everyday use. It's fast, lightweight, and has a good battery life. Very satisfied with my purchase.",4,2024-03-20
+7,104,"This smartwatch is fantastic! It accurately tracks my workouts and the battery lasts for days. Love it!",5,2024-03-21
+8,104,"The smartwatch looks good, but the step counter seems inaccurate. Also, the screen is a bit too small for my liking.",3,2024-03-22
+9,105,"Terrible product! The coffee maker leaked after just a week of use. Customer service was unhelpful. Never buying from this brand again.",1,2024-03-23
+10,105,"Makes great coffee and is easy to clean. The programmable timer is a nice feature. Good value for money.",4,2024-03-24
+
