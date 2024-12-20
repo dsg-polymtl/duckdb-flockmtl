@@ -32,13 +32,15 @@ std::string RESPONSE_FORMAT::Get(const AggregateFunctionType option) {
     switch (option) {
     case AggregateFunctionType::REDUCE:
         return RESPONSE_FORMAT::REDUCE;
+    case AggregateFunctionType::REDUCE_JSON:
+        return RESPONSE_FORMAT::REDUCE_JSON;
+    case AggregateFunctionType::RERANK:
+        return RESPONSE_FORMAT::RERANK;
     case AggregateFunctionType::FIRST:
     case AggregateFunctionType::LAST: {
         return PromptManager::ReplaceSection(RESPONSE_FORMAT::FIRST_OR_LAST, "{{RELEVANCE}}",
                                              option == AggregateFunctionType::FIRST ? "most" : "least");
     }
-    case AggregateFunctionType::RERANK:
-        return RESPONSE_FORMAT::RERANK;
     default:
         return "";
     }

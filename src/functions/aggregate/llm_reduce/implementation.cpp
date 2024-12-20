@@ -2,11 +2,10 @@
 
 namespace flockmtl {
 
-int LlmReduce::GetAvailableTokens() {
+int LlmReduce::GetAvailableTokens(const AggregateFunctionType& function_type) {
     int num_tokens_meta_and_reduce_query = 0;
     num_tokens_meta_and_reduce_query += Tiktoken::GetNumTokens(user_query);
-    num_tokens_meta_and_reduce_query +=
-        Tiktoken::GetNumTokens(PromptManager::GetTemplate(AggregateFunctionType::REDUCE));
+    num_tokens_meta_and_reduce_query += Tiktoken::GetNumTokens(PromptManager::GetTemplate(function_type));
 
     auto model_context_size = model.GetModelDetails().context_window;
     if (num_tokens_meta_and_reduce_query > model_context_size) {
@@ -17,15 +16,16 @@ int LlmReduce::GetAvailableTokens() {
     return available_tokens;
 }
 
-nlohmann::json LlmReduce::ReduceBatch(const nlohmann::json& tuples) {
+nlohmann::json LlmReduce::ReduceBatch(const nlohmann::json& tuples, const AggregateFunctionType& function_type) {
     nlohmann::json data;
-    auto prompt = PromptManager::Render(user_query, tuples, AggregateFunctionType::REDUCE);
+    auto prompt = PromptManager::Render(user_query, tuples, function_type);
     auto response = model.CallComplete(prompt);
     return response["output"];
 };
 
-nlohmann::json LlmReduce::ReduceLoop(const std::vector<nlohmann::json>& tuples) {
-    auto available_tokens = GetAvailableTokens();
+nlohmann::json LlmReduce::ReduceLoop(const std::vector<nlohmann::json>& tuples,
+                                     const AggregateFunctionType& function_type) {
+    auto available_tokens = GetAvailableTokens(function_type);
     auto accumulated_tuples_tokens = 0u;
     auto batch_tuples = nlohmann::json::array();
     int start_index = 0;
@@ -45,7 +45,7 @@ nlohmann::json LlmReduce::ReduceLoop(const std::vector<nlohmann::json>& tuples) 
             accumulated_tuples_tokens += num_tokens;
             start_index++;
         }
-        auto response = ReduceBatch(batch_tuples);
+        auto response = ReduceBatch(batch_tuples, function_type);
         batch_tuples.clear();
         batch_tuples.push_back(response);
         accumulated_tuples_tokens = 0u;
@@ -54,8 +54,9 @@ nlohmann::json LlmReduce::ReduceLoop(const std::vector<nlohmann::json>& tuples) 
     return batch_tuples[0];
 }
 
-void LlmReduce::Finalize(duckdb::Vector& states, duckdb::AggregateInputData& aggr_input_data, duckdb::Vector& result,
-                         idx_t count, idx_t offset) {
+void LlmReduce::FinalizeResults(duckdb::Vector& states, duckdb::AggregateInputData& aggr_input_data,
+                                duckdb::Vector& result, idx_t count, idx_t offset,
+                                const AggregateFunctionType function_type) {
     auto states_vector = duckdb::FlatVector::GetData<AggregateFunctionState*>(states);
 
     auto function_instance = AggregateFunctionBase::GetInstance<LlmReduce>();
@@ -64,7 +65,7 @@ void LlmReduce::Finalize(duckdb::Vector& states, duckdb::AggregateInputData& agg
         auto state_ptr = states_vector[idx];
         auto state = function_instance->state_map[state_ptr];
 
-        auto response = function_instance->ReduceLoop(state->value);
+        auto response = function_instance->ReduceLoop(state->value, function_type);
         result.SetValue(idx, response.dump());
     }
 }

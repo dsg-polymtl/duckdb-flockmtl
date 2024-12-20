@@ -6,7 +6,7 @@ namespace flockmtl {
 
 enum class PromptSection { USER_PROMPT, TUPLES, RESPONSE_FORMAT, INSTRUCTIONS };
 
-enum class AggregateFunctionType { REDUCE, FIRST, LAST, RERANK };
+enum class AggregateFunctionType { REDUCE, REDUCE_JSON, FIRST, LAST, RERANK };
 
 enum class ScalarFunctionType { COMPLETE_JSON, COMPLETE, FILTER };
 
@@ -54,6 +54,11 @@ public:
         "Return a single, coherent output that synthesizes the most relevant information from the tuples provided. "
         "Respond in the following JSON format. **Do not add explanations or additional words beyond the summarized "
         "content.**\n\nResponse Format:\n\n```json\n{\n  \"output\": <summarized content here>\n}\n```";
+    static constexpr auto REDUCE_JSON =
+        "Return a single, coherent output that synthesizes the most relevant information from the tuples provided. "
+        "Respond in the following JSON format where the summarized content should be in JSON format that contains "
+        "the necessary columns for the answer. **Do not add explanations or additional words beyond the summarized "
+        "content.**\n\nResponse Format:\n\n```json\n{\n  \"output\": {<summarized content here>}\n}\n```";
     static constexpr auto FIRST_OR_LAST =
         "Identify the {{RELEVANCE}} relevant tuple based on the provided user prompt from the list of tuples. Output "
         "the index of this single tuple as a JSON object in the following format:\n\n```json\n{\n  \"selected\": "

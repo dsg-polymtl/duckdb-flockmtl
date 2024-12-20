@@ -8,9 +8,9 @@ class LlmReduce : public AggregateFunctionBase {
 public:
     explicit LlmReduce() = default;
 
-    int GetAvailableTokens();
-    nlohmann::json ReduceBatch(const nlohmann::json& tuples);
-    nlohmann::json ReduceLoop(const std::vector<nlohmann::json>& tuples);
+    int GetAvailableTokens(const AggregateFunctionType& function_type);
+    nlohmann::json ReduceBatch(const nlohmann::json& tuples, const AggregateFunctionType& function_type);
+    nlohmann::json ReduceLoop(const std::vector<nlohmann::json>& tuples, const AggregateFunctionType& function_type);
 
 public:
     static void Initialize(const duckdb::AggregateFunction& function, duckdb::data_ptr_t state_p) {
@@ -28,8 +28,14 @@ public:
                         idx_t count) {
         AggregateFunctionBase::Combine<LlmReduce>(source, target, aggr_input_data, count);
     }
+    static void FinalizeResults(duckdb::Vector& states, duckdb::AggregateInputData& aggr_input_data,
+                                duckdb::Vector& result, idx_t count, idx_t offset,
+                                const AggregateFunctionType function_type);
+    template <AggregateFunctionType function_type>
     static void Finalize(duckdb::Vector& states, duckdb::AggregateInputData& aggr_input_data, duckdb::Vector& result,
-                         idx_t count, idx_t offset);
+                         idx_t count, idx_t offset) {
+        FinalizeResults(states, aggr_input_data, result, count, offset, function_type);
+    };
 };
 
 } // namespace flockmtl
