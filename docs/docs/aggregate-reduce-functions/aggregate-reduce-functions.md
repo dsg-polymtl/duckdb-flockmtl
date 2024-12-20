@@ -10,15 +10,19 @@ FlockMTL offers several powerful aggregate / reduce functions:
 
    - **Example Use Cases**: Summarizing documents, aggregating product descriptions.
 
-2. [**`llm_first`**](/docs/aggregate-reduce-functions/llm-first): Returns the most relevant item from a group based on a prompt.
+2. [**`llm_reduce_json`**](/docs/aggregate-reduce-functions/llm-reduce): Aggregates multiple rows into a single JSON output using a language model, ideal for tasks like summarization or consolidating text across multiple features.
+
+   - **Example Use Cases**: Extracting key insights and sentiment from reviews, generating a summary with multiple attributes like themes and tone from survey responses.
+
+3. [**`llm_first`**](/docs/aggregate-reduce-functions/llm-first): Returns the most relevant item from a group based on a prompt.
 
    - **Example Use Cases**: Selecting the top-ranked document, finding the most relevant product.
 
-3. [**`llm_last`**](/docs/aggregate-reduce-functions/llm-last): Returns the least relevant item from a group based on a prompt.
+4. [**`llm_last`**](/docs/aggregate-reduce-functions/llm-last): Returns the least relevant item from a group based on a prompt.
 
    - **Example Use Cases**: Finding the least relevant document, selecting the least important product.
 
-4. [**`llm_rerank`**](/docs/aggregate-reduce-functions/llm-rerank): Reorders a list of rows based on relevance to a prompt using a sliding window mechanism.
+5. [**`llm_rerank`**](/docs/aggregate-reduce-functions/llm-rerank): Reorders a list of rows based on relevance to a prompt using a sliding window mechanism.
    - **Example Use Cases**: Reranking search results, adjusting document or product rankings.
 
 ## 2. How Aggregate / Reduce Functions Work
