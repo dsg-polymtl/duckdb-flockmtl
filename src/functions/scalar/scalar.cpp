@@ -33,11 +33,13 @@ nlohmann::json ScalarFunctionBase::BatchAndComplete(const std::vector<nlohmann::
 
         do {
             accumulated_tuples_tokens +=
-                Tiktoken::GetNumTokens(PromptManager::ConstructMarkdownHeader(tuples[start_index]));
+                Tiktoken::GetNumTokens(PromptManager::ConstructNumTuples(static_cast<int>(tuples.size())));
+            accumulated_tuples_tokens +=
+                Tiktoken::GetNumTokens(PromptManager::ConstructInputTuplesHeader(tuples[start_index]));
             while (accumulated_tuples_tokens < static_cast<unsigned int>(available_tokens) &&
                    start_index < static_cast<int>(tuples.size()) && batch_tuples.size() < batch_size) {
                 const auto num_tokens =
-                    Tiktoken::GetNumTokens(PromptManager::ConstructMarkdownSingleTuple(tuples[start_index]));
+                    Tiktoken::GetNumTokens(PromptManager::ConstructSingleInputTuple(tuples[start_index]));
                 if (accumulated_tuples_tokens + num_tokens > static_cast<unsigned int>(available_tokens)) {
                     break;
                 }
@@ -51,12 +53,25 @@ nlohmann::json ScalarFunctionBase::BatchAndComplete(const std::vector<nlohmann::
                 response = Complete(batch_tuples, user_prompt, function_type, model);
             } catch (const ExceededMaxOutputTokensError&) {
                 batch_tuples.clear();
-                const auto new_batch_size = static_cast<int>(batch_size * 0.1);
+                const auto new_batch_size = static_cast<int>(batch_size / 10);
                 batch_size = batch_size == 1 ? new_batch_size == 0 : new_batch_size;
                 accumulated_tuples_tokens = 0;
                 start_index = 0;
                 continue;
             }
+
+            if (response.size() < batch_tuples.size()) {
+                for (int i = static_cast<int>(response.size()); i < batch_tuples.size(); i++) {
+                    response.push_back(nullptr);
+                }
+            } else if (response.size() > batch_size) {
+                auto new_response = nlohmann::json::array();
+                for (int i = 0; i < batch_size; i++) {
+                    new_response.push_back(response[i]);
+                }
+                response = new_response;
+            }
+
             auto output_tokens_per_tuple = Tiktoken::GetNumTokens(response.dump()) / batch_tuples.size();
 
             batch_size = model.GetModelDetails().max_output_tokens / output_tokens_per_tuple;
